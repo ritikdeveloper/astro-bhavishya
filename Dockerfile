@@ -1,8 +1,16 @@
-==> Cloning from https://github.com/ritikdeveloper/astro-bhavishya
-==> Checking out commit 72ddcc97e36db156ad0d15fea80448bae23701de in branch main
-==> Using Node.js version 22.16.0 (default)
-==> Docs on specifying a Node.js version: https://render.com/docs/node-version
-==> Running build command './mvnw clean package -DskipTests'...
-bash: line 1: ./mvnw: Permission denied
-==> Build failed 😞
-==> Common ways to troubleshoot your deploy: https://render.com/docs/troubleshooting-deploys
+# ---- Build Stage ----
+FROM maven:3.9.6-eclipse-temurin-17 AS build
+WORKDIR /app
+COPY . .
+RUN mvn clean package -DskipTests
+
+# ---- Run Stage ----
+FROM eclipse-temurin:17-jdk-jammy
+WORKDIR /app
+COPY --from=build /app/target/*.jar app.jar
+
+# Use port 10000 for Render, or 8080 if running elsewhere
+EXPOSE 10000
+ENV PORT=10000
+
+CMD ["java", "-jar", "app.jar"]
